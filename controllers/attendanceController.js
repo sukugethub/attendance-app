@@ -55,84 +55,60 @@ module.exports.generateAttendanceCode = async (req, res) => {
         res.status(500).send('Error generating attendance code');
     }
 };
-    
-    module.exports.markAttendance = async (req, res) => {
-        try {
-            const { attendanceCode, courseId, studentId } = req.body;
-    
-            // Find the attendance session by courseId and attendanceCode
-            const session = await attendanceSession.findOne({ courseId, code: attendanceCode });
-            if (!session) {
-                req.flash('error', "Invalid attendance code or course ID");
-                return res.redirect('/dashboard/student/' + studentId);
-            }
-    
-            // Check if the attendance code is expired
-            if (new Date() > session.expiresAt) {
-                req.flash('error', "Attendance code has expired");
-                return res.redirect('/dashboard/student/' + studentId);
-            }
-    
-            // Check if the student has already marked attendance
-            if (session.studentsMarked && session.studentsMarked.includes(studentId)) {
-                req.flash('error', "Attendance already marked for this student");
-                return res.redirect('/dashboard/student/' + studentId);
-            }
-    
-            // Add the student to the attendance session's `studentsMarked` field
-            session.studentsMarked = session.studentsMarked || [];
-            session.studentsMarked.push(studentId);
-            await session.save();
-    
-            // Update the `attendance` field in the CourseSchema
-            const course = await Course.findById(courseId);
-            if (!course) {
-                req.flash('error', "Course not found");
-                return res.redirect('/dashboard/student/' + studentId);
-            }
-    
-            // Find or create the attendance record for the current date
-            const today = new Date().toISOString().split('T')[0]; // Get only the date part
-            let attendanceRecord = course.attendance.find(record => record.date.toISOString().split('T')[0] === today);
-    
-            if (!attendanceRecord) {
-                attendanceRecord = { date: new Date(), studentsPresent: [] };
-                course.attendance.push(attendanceRecord);
-            }
-    
-            // Add the student to the `studentsPresent` field
-            attendanceRecord.studentsPresent.push(studentId);
-            await course.save();
-    
-            req.flash('success', `Attendance marked successfully for the course ${course.name}`);
-            return res.redirect('/dashboard/student/' + studentId);
-        } catch (error) {
-            console.error(error);
-            res.status(500).send('Error marking attendance');
-        }
-    };
 
-    module.exports.getAttendance = async (req, res) => {
-        try {
-            const { courseId, studentId } = req.params;
-    
-            // Find the course and filter attendance records
-            const course = await Course.findById(courseId).populate('attendance.studentsPresent', 'name');
-            if (!course) {
-                return res.status(404).json({ message: 'Course not found' });
-            }
-    
-            // Total number of attendance sessions
-            const totalSessions = course.attendance.length;
-    
-            // Total number of times the student was present
-            const totalPresent = course.attendance.filter(record =>
-                record.studentsPresent.some(student => student._id.toString() === studentId)
-            ).length;
-    
-            res.json({ courseName: course.name, totalSessions, totalPresent });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Error fetching attendance summary' });
+module.exports.markAttendance = async (req, res) => {
+    try {
+        const { attendanceCode, courseId, studentId } = req.body;
+
+        // Find the attendance session by courseId and attendanceCode
+        const session = await attendanceSession.findOne({ courseId, code: attendanceCode });
+        if (!session) {
+            req.flash('error', "Invalid attendance code or course ID");
+            return res.redirect('/dashboard/student/' + studentId);
         }
-    };
+
+        // Check if the attendance code is expired
+        if (new Date() > session.expiresAt) {
+            req.flash('error', "Attendance code has expired");
+            return res.redirect('/dashboard/student/' + studentId);
+        }
+
+        // Check if the student has already marked attendance
+        if (session.studentsMarked && session.studentsMarked.includes(studentId)) {
+            req.flash('error', "Attendance already marked for this student");
+            return res.redirect('/dashboard/student/' + studentId);
+        }
+
+        // Add the student to the attendance session's `studentsMarked` field
+        session.studentsMarked = session.studentsMarked || [];
+        session.studentsMarked.push(studentId);
+        await session.save();
+
+        // Update the `attendance` field in the CourseSchema
+        const course = await Course.findById(courseId);
+        if (!course) {
+            req.flash('error', "Course not found");
+            return res.redirect('/dashboard/student/' + studentId);
+        }
+
+        // Find or create the attendance record for the current date
+        const today = new Date().toISOString().split('T')[0]; // Get only the date part
+        let attendanceRecord = course.attendance.find(record => record.date.toISOString().split('T')[0] === today);
+
+        if (!attendanceRecord) {
+            attendanceRecord = { date: new Date(), studentsPresent: [] };
+            course.attendance.push(attendanceRecord);
+        }
+
+        // Add the student to the `studentsPresent` field
+        attendanceRecord.studentsPresent.push(studentId);
+        await course.save();
+
+        req.flash('success', `Attendance marked successfully for the course ${course.name}`);
+        return res.redirect('/dashboard/student/' + studentId);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error marking attendance');
+    }
+};
+
