@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Welcome, <%= user.name %>!</h1>
+<form method="POST" action="/dashboard/mark-attendance">
+    <input type="text" name="code" placeholder="Enter Code" required />
+    <button type="submit">Mark Attendance</button>
+</form>
+</body>
+</html>
+
+<!-- authController file -->
+
+// module.exports.register = async (req, res) => {
+    //     console.log("register invoked");
+    //     const { name, email, password, role } = req.body;
+    //     console.log(name, email, password, role);
+    //     // const role = "student";
+    //     // console.log(role);
+    //     try {
+    //         const newUser = new User({ name, email, password, role });
+    //         const savedUser = await newUser.save();
+    //         console.log(savedUser);
+    //          // Generate JWT token
+    //          const token = jwt.sign({ id: savedUser._id, role: savedUser.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    
+    //          // Save token in a cookie
+    //          res.cookie('token', token, { httpOnly: true, secure: true });
+    //         // res.redirect(`/dashboard?id=${savedUser._id}`);
+    //         res.redirect('/auth/login');
+    
+    //     } catch (error) {
+    //         console.log(error);
+    //         res.status(400).send('Error: ' + error.message);
+    //     }
+    // };

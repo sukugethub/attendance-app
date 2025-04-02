@@ -1,0 +1,96 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #006A4E;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Registration Container */
+.registration-container {
+    background:#1B4D3E;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    text-align: center;
+}
+
+/* Title */
+.registration-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #ffffff;
+}
+
+
+/* Input Fields */
+input, select{
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #160000;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+}
+span{
+    /* width: 100%; */
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #160000;
+    border-radius: 5px;
+    font-size: 16px;
+    outline: none;
+
+}
+
+/* Input Focus Effect */
+input:focus, select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+/* Button Styling */
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+/* Status Message */
+#status-message {
+    margin-top: 15px;
+    font-size: 14px;
+    color: red;
+}
+
+/* Login Link */
+.login-link {
+    margin-top: 15px;
+    color: #f3f7f8;
+}
+
+.login-link a {
+    color: #f3f7f8;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
