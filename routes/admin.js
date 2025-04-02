@@ -6,12 +6,13 @@ const { getAdminDashboard } = require('../controllers/dashboardController');
 
 
 
+
 // Render the admin dashboard with all courses
 router.get('/dashboard', async (req, res) => {
     try {
         const teachers = await User.find({ role: 'teacher' }); // Fetch all teachers
         const courses = await Course.find().populate('teacher', 'name'); // Fetch all courses with teacher details
-        res.render('admin-dashboard', { teachers, courses });
+        res.render('admin-dashboard', { teacherDetails: teachers, courses }); // Pass teachers as teacherDetails
     } catch (error) {
         console.error(error);
         res.status(500).send('Error loading dashboard');
@@ -19,6 +20,7 @@ router.get('/dashboard', async (req, res) => {
 });
 
 
+// Handle course creation and assign it to an existing teacher
 // Handle course creation and assign it to an existing teacher
 router.post('/add-course', async (req, res) => {
     const { name, code, teacherName } = req.body;
@@ -47,6 +49,12 @@ router.post('/add-course', async (req, res) => {
         teacher.courses.push(newCourse._id);
         await teacher.save();
 
+        // Add the course to each student's `courses` field
+        for (const student of students) {
+            student.courses.push(newCourse._id);
+            await student.save();
+        }
+
         res.redirect('/admin/dashboard?success=Course assigned to teacher successfully');
     } catch (error) {
         console.error(error);
@@ -55,19 +63,41 @@ router.post('/add-course', async (req, res) => {
 });
 
 // Handle course deletion
+// Handle course deletion
 router.post('/delete-course/:id', async (req, res) => {
     try {
         const courseId = req.params.id;
-        await Course.findByIdAndDelete(courseId); // Delete the course by ID
-        // res.redirect('/admin/dashboard'); 
-        
-        res.redirect('/admin/dashboard?success=Course deleted successfully');// Redirect back to the admin dashboard
+
+        // Find the course to be deleted
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.redirect('/admin/dashboard?error=Course not found');
+        }
+
+        // Remove the course from the teacher's `courses` field
+        const teacher = await User.findById(course.teacher);
+        if (teacher) {
+            teacher.courses = teacher.courses.filter(course => course.toString() !== courseId);
+            await teacher.save();
+        }
+
+        // Remove the course from each student's `courses` field
+        const students = await User.find({ _id: { $in: course.enrolledStudents } });
+        for (const student of students) {
+            student.courses = student.courses.filter(course => course.toString() !== courseId);
+            await student.save();
+        }
+
+        // Delete the course
+        await Course.findByIdAndDelete(courseId);
+
+        res.redirect('/admin/dashboard?success=Course deleted successfully');
     } catch (error) {
         console.error(error);
-        // res.status(500).send('Error deleting course');
         res.redirect('/admin/dashboard?error=Error deleting course');
     }
 });
+
 
 module.exports = router;
 

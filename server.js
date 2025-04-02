@@ -48,7 +48,7 @@ app.use('/auth', authRoutes);
 
 app.use('/dashboard', dashboardRoutes);
 app.use("/teacher", teacherRoutes);
-app.use("/attendance", attendanceRoutes)
+app.use('/attendance', attendanceRoutes);
 
 app.get('/', (req, res) => res.render('student-login'));
 const PORT = process.env.PORT || 3000;
