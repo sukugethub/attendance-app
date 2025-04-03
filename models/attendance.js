@@ -1,3 +1,4 @@
+const session = require("express-session");
 const mongoose = require("mongoose");
 
 const attendanceSchema = new mongoose.Schema({
@@ -7,6 +8,10 @@ const attendanceSchema = new mongoose.Schema({
       courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
       attendance: [
         {
+          sessionId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "AttendanceSession",
+          },
           present: { type: Boolean, default: false },
           date: { type: Date, default: Date.now },
         },

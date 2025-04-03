@@ -1,4 +1,5 @@
 const Attendance = require("../models/attendance");
+const AttendanceSessions = require("../models/attendanceSession");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const Course = require("../models/course");
@@ -46,8 +47,11 @@ module.exports.getTeacherDashboard = async (req, res) => {
       },
     });
     console.log("Teacher details : \n", teacherDetails);
+    const attendanceSessions = await AttendanceSessions.find({ teacherId })
+      .populate("courseId", "name _id code")
+      .populate("teacherId", "name _id email");
 
-    res.render("teacher-dashboard", { teacherDetails });
+    res.render("teacher-dashboard", { teacherDetails, attendanceSessions });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error loading teacher dashboard");

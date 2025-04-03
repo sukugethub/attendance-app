@@ -36,7 +36,7 @@
     <div class="container mt-5 bg-success p-2 text-white bg-opacity-75">
       <h1>Admin Dashboard</h1>
       <h2>Name: <%= adminDetails.name %></h2>
-
+      <a href="/auth/logout"><button class="btn btn-danger">Logout</button></a>
       <!-- Alerts Section -->
       <% if (typeof success !== 'undefined') { %>
       <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -102,7 +102,7 @@
       <!-- View and Remove Courses Section -->
       <h2 class="mt-5">All Courses</h2>
 
-      <table class="table table-bordered border-primary">
+      <table class="table table-bordered table-striped table-hover m-0">
         <thead>
           <tr>
             <th>Course Name</th>

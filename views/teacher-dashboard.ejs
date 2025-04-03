@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="container mt-3">
+    <div class="container mt-3 d-flex justify-content-between">
         <% if (successMessage.length > 0) { %>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
             <%= successMessage %>
@@ -29,21 +29,24 @@
         <h1>Teacher Dashboard</h1>
 <form action="/auth/logout"><button class="btn btn-danger">Logout</button></form>
         <!-- Display Courses -->
-        <h2>Your Courses</h2>
+        <h2>Courses you are teaching :</h2>
+
 
     <% teacherDetails.courses.map((course, index) => { %>
-        <li class="list-group-item">
-            <strong><%= course.name %></strong> (<%= course.code %>)
-           
-                <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#<%= course.code %>" aria-expanded="false" aria-controls="collapseExample">
+        <div class="card p-2 my-4">
+          <div class="card-body">
+            <h4 class="my-1"><%= course.name %>&nbsp;&nbsp;(<%= course.code %>)</h4> 
+            <form method="POST" action="/attendance/get-attendance-code?teacherId=<%= teacherDetails._id %>&courseId=<%= course._id %>" style="display:block;">
+              <button type="submit" class="btn btn-primary">Generate Attendance Code</button>
+          </form>
+                <button class="btn btn-primary my-4" type="button" data-bs-toggle="collapse" data-bs-target="#<%= course.code %>" aria-expanded="false" aria-controls="collapseExample">
                   View Enrolled Students
                 </button>
-                <form method="POST" action="/attendance/get-attendance-code?teacherId=<%= teacherDetails._id %>&courseId=<%= course._id %>" style="display:block;">
-                    <button type="submit" class="btn btn-primary">Generate Attendance Code</button>
-                </form>
+                
+                
               <div class="collapse" id="<%= course.code %>">
                 <div class="card card-body">
-                    <table>
+                    <table class="table table-bordered table-striped table-hover m-0">
                         <th>Sl. No.</th>
                         <th>Name</th>
                         <th>Email</th>
@@ -54,7 +57,7 @@
                                 <td><%= index+1 %> </td>
                                 <td><%= student.name %></td> 
                                 <td><%= student.email %>
-                                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#see<%= student._id %>">
+                                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#see<%= student._id %>" data-courseId="<%= course._id %>" data-studentId="<%= student._id %>">
                                         View
                                       </button></td>
                                 </tr>
@@ -63,37 +66,125 @@
                     </table>
                 </div>
               </div>
+              <button class="btn btn-primary my-4" type="button" data-bs-toggle="collapse" data-bs-target="#session<%= course.code %>" aria-expanded="false" aria-controls="collapseExample">
+                View attendance sessions
+              </button>
+              
+              <div class="collapse card" id="session<%= course.code %>">
+                <div class="card-body">
+                    <% const filteredSessions = attendanceSessions.filter(session => session.courseId._id.toString() === course._id.toString()); %>
+                    <% if (filteredSessions.length > 0) { %>
+                    <table class="table table-bordered table-striped table-hover m-0">
+                      <thead>
+                      <tr>
+                        <th>Sl. No.</th>
+                        <th>Course</th>
+                        <th>Attendance Code</th>
+                        <th>Date generated</th>
+                        <th>Code expires at</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <% filteredSessions.forEach((session, index) => { %>
+                        <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= session.courseId.name %></td>
+                        <td><%= session.code %></td>
+                        <td><%= new Date(session.date).toLocaleString("en-IN") %></td>
+                        <td><%= new Date(session.expiresAt).toLocaleString("en-IN") %></td>
+                        </tr>
+                      <% }) %>
+                      </tbody>
+                    </table>
+                    <% } else { %>
+                    <p>No attendance sessions found for this course.</p>
+                    <% } %>
+              </div>
+            </div>
            
-            
-        </li>
+            </div>
+          </div>
         <% course.enrolledStudents.forEach((student, index) => { %>
             <div class="modal fade" id="see<%=student._id  %>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-              <div class="modal-dialog">
+              <div class="modal-dialog modal-xl p-4">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Attendance Details : <%= course.name  %>&nbsp;&nbsp;(<%= course.code  %>)</h1>
+                   
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                   </div>
-                  <div class="modal-body">
-                    ...
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                  </div>
+                  <div class="modal-body p-4">
+                    <h6>Name : <%= student.name %> </h6>
+                    <h6>Email : <%= student.email %> </h6>
+                    <table class="table table-bordered table-striped table-hover m-0">
+                        <thead>
+                          <tr>
+                            <th>Sl. No.</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody id="attendance-<%= student._id %>">
+                          <tr>
+                            <td colspan="3">Loading attendance...</td>
+                          </tr>
+                        </tbody>
+                      </table>
                 </div>
+              </div>
+                  
+                
               </div>
             </div>
                   <% }) %>
     <% }) %>
-</ul>
-        <!-- Display Attendance Sessions -->
-        <h2 class="mt-5">Your Courses</h2>
-<!-- Button trigger modal -->
 
-  
-  <!-- Modal -->
-  
-    </div>
+
+
+</div></div>
+    <script>
+        document.querySelectorAll('[data-bs-target^="#see"]').forEach(button => {
+            button.addEventListener('click', async function () {
+                const studentId = this.getAttribute('data-studentId');
+                const courseId = this.getAttribute('data-courseId');
+                const attendanceTable = document.getElementById(`attendance-${studentId}`);
+                attendanceTable.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
+
+                fetch(`/attendance/get-attendance/${studentId}/${courseId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.length > 0) {
+            console.log(data);
+            attendanceTable.innerHTML = data.map((record, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${new Date(record.date).toLocaleDateString("en-GB")}</td>
+                <td>${record.present ? "P" : "A"}</td>
+              </tr>
+            `).join("");
+            const totalClasses = data.length;
+            const present = data.filter(record => record.present).length;
+            const absent = totalClasses - present;
+            const percentage = ((present / totalClasses) * 100).toFixed(2);
+            
+            // Add summary row
+            attendanceTable.insertAdjacentHTML('beforeend', `
+              <tr class="table-info">
+          <td  class="align-middle text-center"><strong>Summary</strong></td>
+          <td colspan="2">Total Classes : ${totalClasses}<br/>Present : ${present}<br/> Absent : ${absent} <br/>Attendance Percentage : ${percentage}% </td>
+              </tr>
+            `);
+          } else {
+            attendanceTable.innerHTML = `<tr><td colspan="3">No attendance records found.</td></tr>`;
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching attendance:", error);
+          attendanceTable.innerHTML = `<tr><td colspan="3">Error loading attendance.</td></tr>`;
+        })
+        
+            });
+        });
+    </script>
 </body>
 </html>

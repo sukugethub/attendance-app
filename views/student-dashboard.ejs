@@ -45,7 +45,7 @@
     </div>
     <div class="side-nav">
        <h3>My Courses:  <% student.courses.length %></h3>      
-       <table class="table table-dark table-hover m-4">
+       <table class="table table-striped table-hover m-0">
         <th>Sl No. </th><th>Course Id</th><th>Course Name</th><th>Teacher</th><th colspan="2">Actions</th>
         <% student.courses.forEach((course, index) => { %>
             <tr>
@@ -70,18 +70,18 @@
   <!-- Modal -->
   <% student.courses.forEach((course, index) => { %>
   <div class="modal fade" id="mark-<%= course.code %>" tabindex="-1" aria-labelledby="modalLabel-<%= course.code %>" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="#modal-<%= course.code %>">Mark your attendance for : <%= course.name %></h1>
+          <h1 class="modal-title fs-5" id="#modal-<%= course.code %>">Mark your attendance </h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <h3>Subject Code: <%= course.code %></h3>
+            <p class="h4">Course : <%= course.name %>&nbsp;(<%= course.code %>) </p>
           <form action="/attendance/mark-attendance/<%= course._id %>/<%= student._id %>" method="POST">
             <label for="code">Attendance Code</label>
             <input id="code" name="code" type="text">
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
           </form>
         </div>
         
@@ -89,14 +89,14 @@
     </div>
   </div>
   <div class="modal fade" id="see-<%= course.code %>" tabindex="-1" aria-labelledby="seeModalLabel-<%= course.code %>" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="seeModalLabel-<%= course.code %>">Attendance for: <%= course.name %><%= course.code %></h1>
+          <h1 class="modal-title fs-5" id="seeModalLabel-<%= course.code %>">Attendance for: <%= course.name %>&nbsp;(<%= course.code %>)</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <table class="table table-bordered">
+          <table class="table table-bordered table-striped table-hover m-0" >
             <thead>
               <tr>
                 <th>Sl. No.</th>
@@ -123,10 +123,28 @@
                 } else { 
                 %>
                   <tr>
-                    <td colspan="3">No attendance records found for this course.</td>
+                    <td colspan="3">No attendance records found.</td>
                   </tr>
                 <% } %>
-              <%  %>
+              <tr class="table-info">
+                <td class="align-middle"><strong class="m-auto">Summary</strong></td>
+                <td colspan="2" class="text-start">
+                  <% 
+                  if (courseAttendance) {
+                    const totalClasses = courseAttendance.attendance.length;
+                    const totalPresent = courseAttendance.attendance.filter(record => record.present).length;
+                    const totalAbsent = totalClasses - totalPresent;
+                    const attendancePercentage = ((totalPresent / totalClasses) * 100).toFixed(2);
+                  %>
+                    Total Classes: <%= totalClasses %><br>
+                    Present: <%= totalPresent %><br>
+                    Absent: <%= totalAbsent %><br>
+                    Attendance Percentage: <%= attendancePercentage %>%
+                  <% } else { %>
+                    No data available
+                  <% } %>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
