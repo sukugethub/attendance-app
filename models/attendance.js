@@ -1,14 +1,18 @@
-const mongoose = require('mongoose');
-const User = require('./user');
+const mongoose = require("mongoose");
 
-const AttendanceSchema = new mongoose.Schema({
-    studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    attendace: [
+const attendanceSchema = new mongoose.Schema({
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  courses: [
+    {
+      courseId: { type: mongoose.Schema.Types.ObjectId, ref: "Course" },
+      attendance: [
         {
-            present: { type: Boolean, default: false },
-            date: { type: Date, default: Date.now },
-        }
-    ]
+          present: { type: Boolean, default: false },
+          date: { type: Date, default: Date.now },
+        },
+      ],
+    },
+  ],
 });
 
-module.exports = mongoose.model('Attendance', AttendanceSchema);
+module.exports = mongoose.model("Attendance", attendanceSchema);

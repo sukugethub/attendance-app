@@ -27,10 +27,10 @@
     </div>
     <div class="container mt-5">
         <h1>Teacher Dashboard</h1>
-
+<form action="/auth/logout"><button class="btn btn-danger">Logout</button></form>
         <!-- Display Courses -->
         <h2>Your Courses</h2>
-<ul class="list-group">
+
     <% teacherDetails.courses.map((course, index) => { %>
         <li class="list-group-item">
             <strong><%= course.name %></strong> (<%= course.code %>)
@@ -38,26 +38,62 @@
                 <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#<%= course.code %>" aria-expanded="false" aria-controls="collapseExample">
                   View Enrolled Students
                 </button>
-              
+                <form method="POST" action="/attendance/get-attendance-code?teacherId=<%= teacherDetails._id %>&courseId=<%= course._id %>" style="display:block;">
+                    <button type="submit" class="btn btn-primary">Generate Attendance Code</button>
+                </form>
               <div class="collapse" id="<%= course.code %>">
                 <div class="card card-body">
-                    <ul>
-                        <% course.enrolledStudents.forEach(student => { %>
-                            <li><%= student.name %> (<%= student.email %>)</li>
-                        <% }) %>
-                    </ul>
+                    <table>
+                        <th>Sl. No.</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Attendance</th>
+                        
+                        <% course.enrolledStudents.forEach((student, index) => { %>
+                            <tr>
+                                <td><%= index+1 %> </td>
+                                <td><%= student.name %></td> 
+                                <td><%= student.email %>
+                                    <td><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#see<%= student._id %>">
+                                        View
+                                      </button></td>
+                                </tr>
+                                <% }) %>
+                               
+                    </table>
                 </div>
               </div>
            
-            <form method="POST" action="/attendance/get-attendance-code?teacherId=<%= teacherDetails._id %>&courseId=<%= course._id %>" style="display:block;">
-                <button type="submit" class="btn btn-primary">Generate Attendance Code</button>
-            </form>
+            
         </li>
+        <% course.enrolledStudents.forEach((student, index) => { %>
+            <div class="modal fade" id="see<%=student._id  %>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    ...
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+                  <% }) %>
     <% }) %>
 </ul>
         <!-- Display Attendance Sessions -->
-        <h2 class="mt-5">Your Attendance Sessions</h2>
-        
+        <h2 class="mt-5">Your Courses</h2>
+<!-- Button trigger modal -->
+
+  
+  <!-- Modal -->
+  
     </div>
 </body>
 </html>

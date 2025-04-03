@@ -17,7 +17,6 @@
         </div>
     <% } %>
     
-
     <% if (errorMessage.length > 0) { %>
         <div class="alert alert-danger">
             <%= errorMessage %>
@@ -59,7 +58,9 @@
                         Mark Attendance
                     </button>
                 </td>
-                <td><button>See Attendance</button></td>
+                <td><button type="button" class="btn btn-primary w-auto" data-bs-toggle="modal" data-bs-target="#see-<%= course.code %>">
+                  See Attendance
+              </button></td>
             </tr>
 
                 
@@ -76,18 +77,64 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <h3>Subject: </h3>
-          <form action="">
+            <h3>Subject Code: <%= course.code %></h3>
+          <form action="/attendance/mark-attendance/<%= course._id %>/<%= student._id %>" method="POST">
             <label for="code">Attendance Code</label>
             <input id="code" name="code" type="text">
-            <button type="button" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary">Save</button>
           </form>
         </div>
         
       </div>
     </div>
   </div>
+  <div class="modal fade" id="see-<%= course.code %>" tabindex="-1" aria-labelledby="seeModalLabel-<%= course.code %>" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="seeModalLabel-<%= course.code %>">Attendance for: <%= course.name %><%= course.code %></h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Sl. No.</th>
+                <th>Date (DD/MM/YY)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+                <% 
+                const courseAttendance = attendanceData.courses.find(attendance => 
+  attendance.courseId._id.toString() === course._id.toString()
+);
+                if (courseAttendance) {
+                  courseAttendance.attendance.forEach((record, index) => { 
+                %>
+                  <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= new Date(record.date).toLocaleDateString("en-GB") %></td>
+
+                    <td><%= record.present ? 'P' : 'A' %></td>
+                  </tr>
+                <% 
+                  });
+                } else { 
+                %>
+                  <tr>
+                    <td colspan="3">No attendance records found for this course.</td>
+                  </tr>
+                <% } %>
+              <%  %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
   <% }) %>
+ 
     </div>
     
 
